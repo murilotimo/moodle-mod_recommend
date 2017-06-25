@@ -535,3 +535,24 @@ function recommend_get_completion_state($course, $cm, $userid, $type) {
         return $type;
     }
 }
+
+/**
+ * Export this data so it can be used as the context for a mustache template.
+ *
+ * @return stdClass
+ */
+function export_for_template(renderer_base $output) {
+	$data = new stdClass();
+	$data->canmanage = $this->canmanage;
+	$data->things = array();
+	foreach ($this->things as $thing) {
+		$data->things[] = $thing->to_record();
+	}
+	$data->navigation = array();
+	foreach ($this->navigation as $button) {
+		$data->navigation[] = $output->render($button);
+	}
+	
+	return $data;
+}
+

@@ -141,7 +141,9 @@ if (!$action) {
         echo $OUTPUT->single_button($previewurl, get_string('preview', 'mod_recommend'), 'get');
     } else {
         $editurl = new moodle_url('/mod/recommend/edit.php', ['id' => $cm->id]);
+        $requestmentorsurl = new moodle_url('/mod/recommend/requestmentors.php', ['id' => $cm->id]);
         echo $OUTPUT->single_button($editurl, get_string('editquestions', 'mod_recommend'), 'get');
+        echo $OUTPUT->single_button($requestmentorsurl, get_string('requestmentors', 'mod_recommend'), 'get');
     }
 }
 
