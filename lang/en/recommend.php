@@ -164,3 +164,4 @@ $string['typeradio'] = 'Collection of radio buttons';
 $string['typetextarea'] = 'Multiline text with editor';
 $string['typetextfield'] = 'Single line text field';
 $string['yourrecommendations'] = 'Your recommendations';
+$string['requestmentors'] = 'Request to Mentors'

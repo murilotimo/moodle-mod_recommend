@@ -16,10 +16,6 @@
 }}
 
 <div data-region="mentees-by-meentor">
-<form action="../recommend/requestmentors.php?" method="post">
-<input type="hidden" name="r" value="{{r_id}}">
-<input type="hidden" name="id" value="{{cm_id}}">
-<input type="hidden" name="action" value="requestmentor">
 <table class="generaltable fullwidth">
     <thead>
         <tr>
@@ -32,14 +28,14 @@
         {{# mentores}}
             {{# mentor}}
 		        <tr>
-		            <td><input type="checkbox" value="{{id}}" checked="checked"></td>
+		            <td><input id="mentor{{id}}" name="mentors[]" type="checkbox" value="{{id}}" checked="checked"></td>
 		            <td>{{firstname}}</td>
 		            <td>{{lastname}}</td>
 		        </tr>		                	
         	{{/mentor}}
        		{{# mentee}}
         	<tr>
-            	<td><input type="checkbox" value="{{studentid}}" checked="checked"></td>
+            	<td><input id="mentee{{studentid}}" name="mentees[]" type="checkbox" value="{{studentid}}" checked="checked"></td>
             	<td>{{lastname}}</td>
             	<td>{{firstname}}</td>
         	</tr>
@@ -47,6 +43,4 @@
         {{/ mentores}}
     </tbody>
 </table>
-<input type="submit" value="Submit">
-</form>
 </div>

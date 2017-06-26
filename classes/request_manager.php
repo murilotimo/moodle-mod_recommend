@@ -137,6 +137,48 @@ class mod_recommend_request_manager {
     }
 
     /**
+     * Adds mentors requests
+     * @param stdClass $data data from form {@link mod_recommend_add_request_mentors_form}
+     * @param array $mentees whith mentees ids
+     */
+    public function add_requests_mentor($data, $mentees) {
+    	global $CFG, $DB;
+    	
+    	var_dump($mentees);
+    	require_once($CFG->dirroot . '/blocks/fn_mentor/lib.php');
+    	
+    	$canadd = $this->can_add_request();
+    	
+    	foreach ($mentees as $id => $mentee){
+    		$mentors = block_fn_mentor_get_mentors($mentee);
+    		var_dump($mentors);
+    		foreach ($mentors as $idmentor => $mentor){
+    			$user = $DB->get_record('user', ['id' => $mentor->mentorid], '*', MUST_EXIST);
+    			var_dump($user);
+    			$email = $user->email;
+    			$name = $user->firstname . $user->lastname;
+    			$this->add_request($email, $name, $mentee);
+    		}
+    	}
+    	
+    	for ($i = 1; $i <= $canadd; $i++) {
+    		if (!empty($data->{'email'.$i})) {
+    			$email = $data->{'email'.$i};
+    			$name = $data->{'name'.$i};
+    			$requests = $this->get_requests();
+    			foreach ($requests as $request) {
+    				if (strtolower($request->email) === strtolower($email)) {
+    					\core\notification::add(get_string('error_emailduplicated', 'mod_recommend'),
+    							\core\output\notification::NOTIFY_ERROR);
+    					continue 2;
+    				}
+    			}
+    			$this->add_request($email, $name);
+    		}
+    	}
+    }
+
+    /**
      * Generates and returns a unique secret code
      * @param int $userid
      * @param string $email
@@ -159,12 +201,13 @@ class mod_recommend_request_manager {
      * @param string $name
      * @return stdClass
      */
-    protected function add_request($email, $name) {
+    protected function add_request($email, $name, $mentee) {
         global $DB;
         $this->get_requests();
+        $userid = $mentee ? $mentee : $this->get_userid();
         $record = (object)array(
             'recommendid' => $this->object->id,
-            'userid' => $this->get_userid(),
+        	'userid' => $userid,
             'email' => $email,
             'name' => $name,
             'status' => self::STATUS_PENDING,

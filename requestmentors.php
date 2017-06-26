@@ -32,6 +32,7 @@ require_once($CFG->dirroot . '/blocks/fn_mentor/lib.php');
 $id = optional_param('id', 0, PARAM_INT); // Course_module ID, or
 $r  = optional_param('r', 0, PARAM_INT);  // Recommend instance ID.
 $action = optional_param('action', null, PARAM_ALPHA);
+$mentees = optional_param('mentees', null, PARAM_RAW);
 
 if ($id) {
 	list($course, $cm) = get_course_and_cm_from_cmid($id, 'recommend');
@@ -61,6 +62,27 @@ $url = new moodle_url('/mod/recommend/requestmentors.php', ['id' => $cm->id]);
 $PAGE->set_url($url);
 echo $OUTPUT->header();
 
+$manager = new mod_recommend_request_manager($cm, $recommend);
+
+if ($action === null) {
+	\mod_recommend\event\course_module_viewed::create_from_cm($cm, $course, $recommend)->trigger();
+	$completion = new completion_info($course);
+	$completion->set_module_viewed($cm);
+} else if ($action === 'requestmentor' && $manager->can_add_request()) {
+	$form = new mod_recommend_add_request_mentors_form(null, ['manager' => $manager]);
+	if ($form->is_cancelled()) {
+		redirect($viewurl);
+	} else if ($data = $form->get_data()) {
+		$manager->add_requests_mentor($data,$mentees);
+		\core\notification::add(get_string('requestscreated', 'mod_recommend'),
+				core\output\notification::NOTIFY_SUCCESS);
+		redirect($viewurl);
+	}
+	$title = get_string('addrequest', 'mod_recommend');
+	$PAGE->navbar->add($title);
+}
+
+
 
 $mentores = block_fn_mentor_get_mentees_by_mentor($courseid = $course->id);
 
@@ -71,8 +93,9 @@ foreach ($arr['mentores'] as $key=>$value){
 $arr['r_id']= $cm->instance;
 $arr['cm_id']= $cm->id;
 
-
-echo $OUTPUT->render_from_template('recommend/list_mentees_by_mentor', $arr);
+$mentortable = $OUTPUT->render_from_template('recommend/list_mentees_by_mentor', $arr);
+$form = new mod_recommend_add_request_mentors_form(null, ['manager' => $manager , 'mentortable' => $mentortable] );
+$form->display();
 
 
 echo $OUTPUT->footer();
